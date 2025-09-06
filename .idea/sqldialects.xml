@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/Database.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/H2.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/java/SQLite.java" dialect="GenericSQL" />
+  </component>
+</project>
