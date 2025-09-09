@@ -1,6 +1,6 @@
 import java.sql.*;
 import java.util.Map;
-
+/*
 public class SQLite implements Database{
     private final Connection conn;
 
@@ -8,7 +8,7 @@ public class SQLite implements Database{
         this.conn = DriverManager.getConnection(url);
     }
 
-    @Override
+
     public Connection getConnection() {
         return this.conn;
     }
@@ -24,11 +24,11 @@ public class SQLite implements Database{
     }
 
     @Override
-    public void createTask(int id, String contact) {
+    public void createTask(int id, Task task) {
         String sql = "INSERT INTO tasks VALUES(?, ?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
-            pstmt.setString(2, contact);
+            pstmt.setString(2, clazz);
             pstmt.setString(3, "TODO");
             pstmt.executeUpdate();
         } catch(SQLException e){
@@ -37,7 +37,7 @@ public class SQLite implements Database{
     }
 
     @Override
-    public Map.Entry<Integer, Map.Entry<String, String>> readTask(int id) {
+    public AbstractTask readTask(int id) {
         String sql = "SELECT id, name, status FROM tasks WHERE id = (?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
@@ -92,3 +92,6 @@ public class SQLite implements Database{
         }
     }
 }
+
+
+ */

@@ -1,19 +1,16 @@
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 
 public class Main {
 
     public static void main(String[] args) throws SQLException {
-        SQLite sqlite = new SQLite("jdbc:sqlite:sqliteDb");
-        H2 h2 = new H2("jdbc:h2:tcp://localhost:9092/h2-data/test", "sa", null);
+        H2 test = new H2();
+        BasicTask testTask = new BasicTask("Test", Status.TODO, "Basic Task");
 
-
-        sqlite.deleteData();
-        sqlite.dropTable();
-
-        h2.deleteData();
-        h2.dropTable();
+        System.out.println("Raw Data: " + Arrays.toString(test.readRawData(1)));
+        System.out.println("Task Data: \n" + test.readTask(1).toString());
 
 
     }

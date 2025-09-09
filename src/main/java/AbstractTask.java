@@ -1,61 +1,52 @@
-import java.lang.reflect.InvocationTargetException;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.nio.ByteBuffer;
 
 public abstract class AbstractTask implements Task {
 
     protected static AbstractTask deserialize(ByteBuffer data) {
-        int taskId = data.getInt();
-        int nameLength = data.getInt();
 
-        byte[] nameBytes = new byte[nameLength];
-        data.get(nameBytes);
-        String name = new String(nameBytes);
+        byte typeId = data.get();
 
-        int statusLength = data.getInt();
-        byte[] statusBytes = new byte[statusLength];
-        data.get(statusBytes);
-        String statusName = new String(statusBytes);
+        TaskRegistry registry = TaskRegistry.fromTypeId(typeId);
 
-        int typeNameLength = data.getInt();
-        byte[] typeNameBytes = new byte[typeNameLength];
-        data.get(typeNameBytes);
-        String typeName = new String(typeNameBytes);
-
-        try{
-            Class<?> taskClass = Class.forName(typeName);
-            java.lang.reflect.Constructor<?> constructor = taskClass.getConstructor(int.class, String.class, Status.class);
-            return (AbstractTask) constructor.newInstance(taskId, name, Status.valueOf(statusName));
-        } catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e){
-            System.err.println("Failed to get Task: " + e);
+        if(registry == null){
+            System.err.println("Unknown type Id: " + typeId);
+            return null;
         }
-        return null;
+
+        return registry.getDeserializer().apply(data);
     }
 
-    private final int id;
-    private final String name;
-    private final Status status;
 
-    public AbstractTask(int id, String name){
-        this.id = id;
+    @Getter @ Setter
+    protected String name;
+    @Getter @Setter
+    protected Status status;
+    @Getter
+    protected String description;
+
+    public AbstractTask( String name){
         this.name = name;
         this.status = Status.TODO;
     }
 
     public byte[] serialize() {
-        byte[] typeName = this.getClass().getName().getBytes();
         byte[] name = this.name.getBytes();
         byte[] status = this.status.name().getBytes();
-        ByteBuffer buffer = ByteBuffer.allocate((Integer.BYTES * 4) + typeName.length + name.length + status.length);
-        buffer.putInt(id);
+        byte[] description = this.description.getBytes();
+        byte typeId = TaskRegistry.fromClass(this.getClass()).getTypeId();
+
+        ByteBuffer buffer = ByteBuffer.allocate((Integer.BYTES * 4) + name.length + status.length + description.length);
+        buffer.put(typeId);
         buffer.putInt(name.length);
         buffer.put(name);
         buffer.putInt(status.length);
         buffer.put(status);
-        buffer.putInt(typeName.length);
-        buffer.put(typeName);
+        buffer.putInt(description.length);
+        buffer.put(description);
         return buffer.array();
     }
-
-
 
 }
