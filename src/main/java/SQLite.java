@@ -1,21 +1,18 @@
+import java.nio.ByteBuffer;
 import java.sql.*;
 import java.util.Map;
-/*
+
 public class SQLite implements Database{
     private final Connection conn;
 
-    public SQLite(String url) throws SQLException {
-        this.conn = DriverManager.getConnection(url);
-    }
-
-
-    public Connection getConnection() {
-        return this.conn;
+    public SQLite() throws SQLException {
+        DatabaseManager manager = new DatabaseManager();
+        this.conn = manager.getSqliteConnection();
     }
 
     @Override
     public void createTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS tasks(ID INT PRIMARY KEY, NAME VARCHAR(255), STATUS VARCHAR(255))";
+        String sql = "CREATE TABLE IF NOT EXISTS tasks(ID INT PRIMARY KEY, DATA BLOB)";
         try(Statement stmt = conn.createStatement()){
             stmt.execute(sql);
         } catch(SQLException e){
@@ -28,25 +25,38 @@ public class SQLite implements Database{
         String sql = "INSERT INTO tasks VALUES(?, ?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
-            pstmt.setString(2, clazz);
-            pstmt.setString(3, "TODO");
+            pstmt.setBytes(2, task.serialize());
             pstmt.executeUpdate();
         } catch(SQLException e){
             System.err.println("Failed to create task: " + e);
         }
     }
 
-    @Override
-    public AbstractTask readTask(int id) {
-        String sql = "SELECT id, name, status FROM tasks WHERE id = (?)";
+    public byte[] readRawData(int id){
+        String sql = "SELECT data FROM tasks WHERE id = (?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
             try(ResultSet rs = pstmt.executeQuery()){
                 if(rs.next()){
-                    int taskId = rs.getInt("id");
-                    String taskName = rs.getString("name");
-                    String taskStatus = rs.getString("status");
-                    return Map.entry(taskId, taskName);
+                    return rs.getBytes("data");
+                }
+            }
+        } catch (SQLException e){
+            System.err.println("Failed to read raw data: " + e);
+        }
+        return null;
+    }
+
+    @Override
+    public AbstractTask readTask(int id) {
+        String sql = "SELECT data FROM tasks WHERE id = (?)";
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1, id);
+            try(ResultSet rs = pstmt.executeQuery()){
+                if(rs.next()){
+                    byte[] bytes = rs.getBytes("data");
+                    ByteBuffer buffer = ByteBuffer.wrap(bytes);
+                    return AbstractTask.deserialize(buffer);
                 }
             }
         } catch(SQLException e){
@@ -55,9 +65,18 @@ public class SQLite implements Database{
         return null;
     }
 
+
     @Override
     public void saveTask(int id, String neededStatus) {
-
+        String sql = "UPDATE data = (?) WHERE id = (?)";
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1, id);
+            AbstractTask task = readTask(id);
+            task.setStatus(Status.valueOf(neededStatus));
+            pstmt.setBytes(2, task.serialize());
+        } catch(Exception e){
+            System.err.println("Error updating task: " + e);
+        }
     }
 
     @Override
@@ -94,4 +113,3 @@ public class SQLite implements Database{
 }
 
 
- */

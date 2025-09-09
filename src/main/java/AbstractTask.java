@@ -38,7 +38,7 @@ public abstract class AbstractTask implements Task {
         byte[] description = this.description.getBytes();
         byte typeId = TaskRegistry.fromClass(this.getClass()).getTypeId();
 
-        ByteBuffer buffer = ByteBuffer.allocate((Integer.BYTES * 4) + name.length + status.length + description.length);
+        ByteBuffer buffer = ByteBuffer.allocate((1 + Integer.BYTES * 3) + name.length + status.length + description.length);
         buffer.put(typeId);
         buffer.putInt(name.length);
         buffer.put(name);
