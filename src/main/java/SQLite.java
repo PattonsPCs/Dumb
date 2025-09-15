@@ -1,7 +1,11 @@
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.ByteBuffer;
 import java.sql.*;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
+@Slf4j
 public class SQLite implements Database{
     private final Connection conn;
 
@@ -16,7 +20,7 @@ public class SQLite implements Database{
         try(Statement stmt = conn.createStatement()){
             stmt.execute(sql);
         } catch(SQLException e){
-            System.err.println("Failed to create table: " + e);
+            log.error("Failed to create table: {}", String.valueOf(e));
         }
     }
 
@@ -28,7 +32,7 @@ public class SQLite implements Database{
             pstmt.setBytes(2, task.serialize());
             pstmt.executeUpdate();
         } catch(SQLException e){
-            System.err.println("Failed to create task: " + e);
+            log.error("Failed to create task: {}", String.valueOf(e));
         }
     }
 
@@ -42,10 +46,11 @@ public class SQLite implements Database{
                 }
             }
         } catch (SQLException e){
-            System.err.println("Failed to read raw data: " + e);
+            log.error("Failed to read raw data: {}", String.valueOf(e));
         }
         return null;
     }
+
 
     @Override
     public AbstractTask readTask(int id) {
@@ -60,24 +65,41 @@ public class SQLite implements Database{
                 }
             }
         } catch(SQLException e){
-            System.err.println("Error reading task: " + e);
+            log.error("Error reading task: {}", String.valueOf(e));
         }
         return null;
     }
 
 
     @Override
-    public void saveTask(int id, String neededStatus) {
+    public void saveTask(int id, Task task) {
         String sql = "UPDATE data = (?) WHERE id = (?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
-            AbstractTask task = readTask(id);
-            task.setStatus(Status.valueOf(neededStatus));
             pstmt.setBytes(2, task.serialize());
         } catch(Exception e){
-            System.err.println("Error updating task: " + e);
+            log.error("Error updating task: {}", String.valueOf(e));
         }
     }
+
+    public List<Task> getAllTasks(){
+        String sql = "SELECT * FROM tasks";
+        List<Task> tasks = new ArrayList<>();
+        try(ResultSet rs = conn.prepareStatement(sql).executeQuery()){
+            while(rs.next()){
+                byte[] bytes = rs.getBytes("data");
+                ByteBuffer buffer = ByteBuffer.wrap(bytes);
+                Task task = AbstractTask.deserialize(buffer);
+                tasks.add(task);
+            }
+            return tasks;
+        } catch(SQLException e){
+            log.error("Error getting all tasks: {}", String.valueOf(e));
+        }
+        return null;
+    }
+
+
 
     @Override
     public void deleteTask(int id) {
@@ -86,7 +108,7 @@ public class SQLite implements Database{
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
         } catch(SQLException e){
-            System.err.println("Error deleting task: " + e);
+            log.error("Error deleting task: {}", String.valueOf(e));
         }
 
     }
@@ -97,7 +119,7 @@ public class SQLite implements Database{
         try(Statement stmt = conn.createStatement()){
             stmt.execute(sql);
         } catch (SQLException e){
-            System.err.println("Error deleting data: " + e);
+            log.error("Error deleting data: {}", String.valueOf(e));
         }
     }
 
@@ -107,7 +129,7 @@ public class SQLite implements Database{
         try(Statement stmt = conn.createStatement()){
             stmt.execute(sql);
         } catch (SQLException e){
-            System.err.println("Error dropping table: " + e);
+            log.error("Error dropping table: {}", String.valueOf(e));
         }
     }
 }

@@ -1,45 +1,40 @@
 import lombok.Getter;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.function.Function;
+import java.util.Arrays;
 
+@Getter
 public enum TaskRegistry {
-    BASIC((byte) 1, BasicTask.class, BasicTask::new);
-    @Getter
-    private final byte typeId;
-    @Getter
-    private final Class<? extends AbstractTask> taskClass;
-    @Getter
-    private final Function<ByteBuffer, ? extends AbstractTask> deserializer;
 
-    TaskRegistry(byte typeId, Class<? extends AbstractTask> taskClass, Function<ByteBuffer, ? extends AbstractTask> deserializer){
+    BASIC((byte) 1, BasicTask.class),
+    SCHEDULE((byte) 2, ScheduleTask.class);
+
+    private final byte typeId;
+    private final Class<? extends AbstractTask> taskClass;
+
+    TaskRegistry(byte typeId, Class<? extends AbstractTask> taskClass){
         this.typeId = typeId;
         this.taskClass = taskClass;
-        this.deserializer = deserializer;
     }
 
-    public static TaskRegistry fromClass(Class<?> clazz){
-        for(TaskRegistry entry : values()){
-            if(entry.getTaskClass().equals(clazz)){
-                return entry;
-            }
-        }
-        return null;
+    @SneakyThrows
+    public AbstractTask deserialize(ByteBuffer buffer) {
+        Method method = taskClass.getDeclaredMethod("deserialize", ByteBuffer.class);
+        return (AbstractTask) method.invoke(null, buffer);
     }
 
-    public static TaskRegistry fromTypeId(byte typeId){
-        for(TaskRegistry entry : values()){
-            if(entry.getTypeId() == typeId){
-                return entry;
-            }
-        }
-        return null;
+    public static TaskRegistry fromClass(Class<?> clazz) {
+        return Arrays.stream(values())
+                .filter(type -> type.getTaskClass().equals(clazz))
+                .findFirst().orElseThrow();
     }
 
-
-
-
-
-
+    public static TaskRegistry fromTypeId(byte typeId) {
+        return Arrays.stream(values())
+                .filter(type -> type.getTypeId() == typeId)
+                .findFirst().orElseThrow();
+    }
 
 }

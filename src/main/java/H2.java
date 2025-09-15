@@ -1,6 +1,5 @@
 import java.nio.ByteBuffer;
 import java.sql.*;
-import java.util.Map;
 
 public class H2 implements Database{
 
@@ -75,12 +74,10 @@ public class H2 implements Database{
     }
 
     @Override
-    public void saveTask(int id, String neededStatus) {
+    public void saveTask(int id, Task task) {
         String sql = "UPDATE data = (?) WHERE id = (?)";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, id);
-            AbstractTask task = readTask(id);
-            task.setStatus(Status.valueOf(neededStatus));
             pstmt.setBytes(2, task.serialize());
         } catch(Exception e){
             System.err.println("Error updating task: " + e);

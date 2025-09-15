@@ -1,16 +1,15 @@
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Random;
 
 public class Main {
 
     public static void main(String[] args) throws SQLException {
-        SQLite test = new SQLite();
+        SQLite db = new SQLite();
         BasicTask testTask = new BasicTask("Test", Status.TODO, "Basic Task");
+        ScheduleTask nextTest = new ScheduleTask("ScheduleTest", Status.TODO, "A task with a deadline", 12000000);
 
-        System.out.println("Raw Data: " + Arrays.toString(test.readRawData(1)));
-        System.out.println("Task Data: \n" + test.readTask(1).toString());
+
+        System.out.println(db.readTask(1));
 
     }
+
 }

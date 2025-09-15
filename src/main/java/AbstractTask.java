@@ -27,7 +27,7 @@ public abstract class AbstractTask implements Task {
     @Getter
     protected String description;
 
-    public AbstractTask( String name){
+    public AbstractTask(String name){
         this.name = name;
         this.status = Status.TODO;
     }
