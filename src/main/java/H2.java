@@ -7,9 +7,8 @@ public class H2 implements Database{
 
     private final Connection conn;
 
-    public H2() throws SQLException{
-        DatabaseManager manager = new DatabaseManager();
-        this.conn = manager.getH2Connection();
+    public H2(Connection conn) throws SQLException{
+        this.conn = conn;
     }
 
 

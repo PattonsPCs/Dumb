@@ -9,9 +9,8 @@ import java.util.List;
 public class SQLite implements Database{
     private final Connection conn;
 
-    public SQLite() throws SQLException {
-        DatabaseManager manager = new DatabaseManager();
-        this.conn = manager.getSqliteConnection();
+    public SQLite(Connection conn) throws SQLException {
+        this.conn = conn;
     }
 
     @Override
