@@ -1,5 +1,9 @@
+package com.anthony;
+
 import java.nio.ByteBuffer;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class H2 implements Database{
 
@@ -7,7 +11,7 @@ public class H2 implements Database{
 
     private final Connection conn;
 
-    public H2(Connection conn) throws SQLException{
+    public H2(Connection conn){
         this.conn = conn;
     }
 
@@ -28,23 +32,22 @@ public class H2 implements Database{
        try{
            byte[] data = task.serialize();
            String sql = "INSERT INTO tasks VALUES(?, ?)";
-           try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-               pstmt.setInt(1, id);
-               pstmt.setBytes(2, data);
-               pstmt.executeUpdate();
+           try(PreparedStatement pStmt = conn.prepareStatement(sql)){
+               pStmt.setInt(1, id);
+               pStmt.setBytes(2, data);
+               pStmt.executeUpdate();
            }
        } catch (Exception e) {
            System.err.println("Failed to create task: " + e);
        }
     }
 
-    // HOLY FUCK THE AUTISM IS STRONG WITH THIS ONE
     @Override
     public AbstractTask readTask(int id) {
         String sql = "SELECT data FROM tasks WHERE id = (?)";
-        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, id);
-            try(ResultSet rs = pstmt.executeQuery()){
+        try(PreparedStatement pStmt = conn.prepareStatement(sql)){
+            pStmt.setInt(1, id);
+            try(ResultSet rs = pStmt.executeQuery()){
                 if(rs.next()){
                     byte[] clazzBytes = rs.getBytes("data");
                     ByteBuffer buffer = ByteBuffer.wrap(clazzBytes);
@@ -57,11 +60,12 @@ public class H2 implements Database{
         return null;
     }
 
+    /*
     public byte[] readRawData(int id){
         String sql = "SELECT data FROM tasks WHERE id = (?)";
-        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, id);
-            try(ResultSet rs = pstmt.executeQuery()){
+        try(PreparedStatement pStmt = conn.prepareStatement(sql)){
+            pStmt.setInt(1, id);
+            try(ResultSet rs = pStmt.executeQuery()){
                 if(rs.next()){
                     return rs.getBytes("data");
                 }
@@ -72,12 +76,14 @@ public class H2 implements Database{
         return null;
     }
 
+     */
+
     @Override
     public void saveTask(int id, Task task) {
         String sql = "UPDATE data = (?) WHERE id = (?)";
-        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, id);
-            pstmt.setBytes(2, task.serialize());
+        try(PreparedStatement pStmt = conn.prepareStatement(sql)){
+            pStmt.setInt(1, id);
+            pStmt.setBytes(2, task.serialize());
         } catch(Exception e){
             System.err.println("Error updating task: " + e);
         }
@@ -87,9 +93,9 @@ public class H2 implements Database{
     @Override
     public void deleteTask(int id) {
         String sql = "DELETE FROM tasks WHERE id = (?)";
-        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, id);
-            pstmt.executeUpdate();
+        try(PreparedStatement pStmt = conn.prepareStatement(sql)){
+            pStmt.setInt(1, id);
+            pStmt.executeUpdate();
         } catch(SQLException e){
             System.err.println("Error deleting task: " + e);
         }
@@ -113,6 +119,22 @@ public class H2 implements Database{
         } catch (SQLException e){
             System.err.println("Error dropping table: " + e);
         }
+    }
+
+    @Override
+    public List<Integer> getAllTaskIds(){
+        String sql = "SELECT id FROM tasks";
+        List<Integer> ids = new ArrayList<>();
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            try(ResultSet rs = pstmt.executeQuery()){
+                while(rs.next()){
+                    ids.add(rs.getInt("id"));
+                }
+            }
+        } catch(SQLException e){
+            System.err.println("Error getting task id: " + e);
+        }
+        return ids;
     }
 
 }

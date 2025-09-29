@@ -1,3 +1,5 @@
+package com.anthony;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.ByteBuffer;
@@ -130,6 +132,22 @@ public class SQLite implements Database{
         } catch (SQLException e){
             log.error("Error dropping table: {}", String.valueOf(e));
         }
+    }
+
+    @Override
+    public List<Integer> getAllTaskIds(){
+        String sql = "SELECT id FROM tasks";
+        List<Integer> ids = new ArrayList<>();
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            try(ResultSet rs = pstmt.executeQuery()){
+                while(rs.next()){
+                    ids.add(rs.getInt("id"));
+                }
+            }
+        } catch(SQLException e){
+            System.err.println("Error getting task id: " + e);
+        }
+        return ids;
     }
 }
 

@@ -1,4 +1,4 @@
-import lombok.Setter;
+package com.anthony;
 
 import java.nio.ByteBuffer;
 
@@ -35,7 +35,7 @@ public class BasicTask extends AbstractTask {
 
     @Override
     public String toString(){
-       return "Name: " + name + "\nId: " + getId() + "\nStatus: " + getStatus() + "\nDescription: " + getDescription();
+       return "Name: " + name + "\nId: " + getId() + "\ncom.anthony.Status: " + getStatus() + "\nDescription: " + getDescription();
     }
 
 }

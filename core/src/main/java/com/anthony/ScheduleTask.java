@@ -1,3 +1,5 @@
+package com.anthony;
+
 import lombok.Getter;
 
 import java.nio.ByteBuffer;
@@ -73,6 +75,6 @@ public class ScheduleTask extends AbstractTask{
 
     @Override
     public String toString(){
-        return "Name: " + name + "\nId: " + getId() + "\nStatus: " + getStatus() + "\nDescription: " + getDescription() + "\nDeadline: " + getDeadline() + "\nLate: " + isActive();
+        return "Name: " + name + "\nId: " + getId() + "\ncom.anthony.Status: " + getStatus() + "\nDescription: " + getDescription() + "\nDeadline: " + getDeadline() + "\nLate: " + isActive();
     }
 }
