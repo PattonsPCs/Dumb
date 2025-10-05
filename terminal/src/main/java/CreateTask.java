@@ -26,6 +26,7 @@ public class CreateTask implements Runnable {
             }
             System.out.println("Connected!");
             System.out.println("Creating task: " + taskName);
+            db.createTable();
             db.createTask(taskId, new BasicTask(taskName, Status.TODO, "User created task."));
         } catch(SQLException e){
             System.err.println("Error creating task: " + e);

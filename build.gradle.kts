@@ -1,6 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 plugins {
     id("java")
     id("application")
+    kotlin("jvm") version "2.2.20"
 }
 
 application{
@@ -34,4 +38,12 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+allprojects {
+    tasks.withType<KotlinJvmCompile> {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
 }

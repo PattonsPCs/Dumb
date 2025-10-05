@@ -29,7 +29,8 @@ public class DatabaseManager {
 
     private Connection createSQLiteConnection() throws SQLException{
         HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setJdbcUrl("jdbc:sqlite:SQLite");
+        dataSource.setJdbcUrl("jdbc:sqlite:C:\\Users\\Patpat\\IdeaProjects\\SmthStupidIg\\terminal\\sqlite.db");
+        dataSource.setDriverClassName("org.sqlite.JDBC");
         dataSource.setUsername(null);
         dataSource.setPassword(null);
         return dataSource.getConnection();
