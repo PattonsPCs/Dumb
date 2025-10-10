@@ -1,22 +1,22 @@
 package com.anthony;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.nio.ByteBuffer;
+import java.time.LocalTime;
 
 public class ScheduleTask extends AbstractTask{
 
-    @Getter // Use a long for milliseconds, why need time like this
-    //
+    @Getter @Setter
     protected long deadline;
 
-    // Erm why the frick u using the non-primitive long
     public ScheduleTask(String name,Status status, String description, long deadline){
         super(name);
         this.deadline = deadline;
         this.status = status;
         this.description = description;
-        this.id = 2;
+        this.typeId = 2;
     }
 
 
@@ -69,12 +69,14 @@ public class ScheduleTask extends AbstractTask{
 
 
 
-    public boolean isActive(){
-        return System.currentTimeMillis() < deadline;
+    public boolean isLate(){
+        LocalTime now = LocalTime.now();
+        long nowMillis = now.toSecondOfDay() * 1000L + now.getNano() / 1000_000;
+        return nowMillis >= deadline;
     }
 
     @Override
     public String toString(){
-        return "Name: " + name + "\nId: " + getId() + "\ncom.anthony.Status: " + getStatus() + "\nDescription: " + getDescription() + "\nDeadline: " + getDeadline() + "\nLate: " + isActive();
+        return "Name: " + name + "\nType Id: " + getTypeId() + "\nStatus: " + getStatus() + "\nDescription: " + getDescription() + "\nDeadline: " + TimeFormatting.millisToTimeString(getDeadline()) + "\nLate: " + isLate();
     }
 }

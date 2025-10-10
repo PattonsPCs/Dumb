@@ -25,6 +25,15 @@ public class ReadTask implements Runnable{
             System.out.println("Connected!");
             System.out.println("Reading task: " + taskID);
             System.out.println(db.readTask(taskID));
+            if(db.readTask(taskID) instanceof ScheduleTask schedTask){
+                if(schedTask.isLate()){
+                    System.out.println("Task is late. Deleting...");
+                    db.deleteTask(taskID);
+                } else if (schedTask.getStatus() == Status.TODO){
+                    schedTask.setStatus(Status.IN_PROGRESS);
+                    db.saveTask(taskID, schedTask);
+                }
+            }
         } catch(SQLException e){
             System.err.println("Error while reading task: " + e);
         }

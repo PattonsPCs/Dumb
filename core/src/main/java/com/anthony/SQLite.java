@@ -74,10 +74,11 @@ public class SQLite implements Database{
 
     @Override
     public void saveTask(int id, Task task) {
-        String sql = "UPDATE data = (?) WHERE id = (?)";
+        String sql = "UPDATE tasks SET data = ? WHERE id = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, id);
-            pstmt.setBytes(2, task.serialize());
+            pstmt.setBytes(1, task.serialize());
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
         } catch(Exception e){
             log.error("Error updating task: {}", String.valueOf(e));
         }
@@ -145,7 +146,7 @@ public class SQLite implements Database{
                 }
             }
         } catch(SQLException e){
-            System.err.println("Error getting task id: " + e);
+            System.err.println("Error getting task typeId: " + e);
         }
         return ids;
     }

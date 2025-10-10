@@ -41,6 +41,7 @@ public class Main extends Application {
         h2Btn.setSelected(true);
         Button createBtn = new Button("Create a Task");
         Button readBtn = new Button("Read a Task");
+        Button updBtn = new Button("Update a Task");
         Button deleteBtn = new Button("Delete a Task");
         Button quitBtn = new Button("End the program");
 

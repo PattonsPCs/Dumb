@@ -13,6 +13,10 @@ public class CreateTask implements Runnable {
     @CommandLine.Parameters(index = "1", paramLabel = "NAME", description = "Task Name")
     String taskName;
 
+    @CommandLine.Option(names = {"-dl", "--deadline"}, description = "Task Deadline (HH:mm - 24 Hour Clock)")
+    String deadline;
+
+
     @Override
     public void run(){
         try {
@@ -27,7 +31,11 @@ public class CreateTask implements Runnable {
             System.out.println("Connected!");
             System.out.println("Creating task: " + taskName);
             db.createTable();
-            db.createTask(taskId, new BasicTask(taskName, Status.TODO, "User created task."));
+            if(deadline != null){
+                db.createTask(taskId, new ScheduleTask(taskName, Status.TODO, "Schedule Task", TimeFormatting.timeStringToMillis(deadline)));
+            } else {
+                db.createTask(taskId, new BasicTask(taskName, Status.TODO, "Basic Task"));
+            }
         } catch(SQLException e){
             System.err.println("Error creating task: " + e);
         }

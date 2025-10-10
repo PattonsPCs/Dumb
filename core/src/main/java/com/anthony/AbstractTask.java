@@ -20,7 +20,7 @@ public abstract class AbstractTask implements Task {
     @Setter
     protected Status status;
     protected String description;
-    protected int id;
+    protected int typeId;
 
     public AbstractTask(String name){
         this.name = name;

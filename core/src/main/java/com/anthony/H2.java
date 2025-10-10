@@ -60,23 +60,7 @@ public class H2 implements Database{
         return null;
     }
 
-    /*
-    public byte[] readRawData(int id){
-        String sql = "SELECT data FROM tasks WHERE id = (?)";
-        try(PreparedStatement pStmt = conn.prepareStatement(sql)){
-            pStmt.setInt(1, id);
-            try(ResultSet rs = pStmt.executeQuery()){
-                if(rs.next()){
-                    return rs.getBytes("data");
-                }
-            }
-        } catch (SQLException e){
-            System.err.println("Failed to read raw data: " + e);
-        }
-        return null;
-    }
 
-     */
 
     @Override
     public void saveTask(int id, Task task) {
@@ -132,7 +116,7 @@ public class H2 implements Database{
                 }
             }
         } catch(SQLException e){
-            System.err.println("Error getting task id: " + e);
+            System.err.println("Error getting task typeId: " + e);
         }
         return ids;
     }

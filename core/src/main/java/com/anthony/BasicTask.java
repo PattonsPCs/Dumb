@@ -27,7 +27,7 @@ public class BasicTask extends AbstractTask {
         super(name);
         this.status = status;
         this.description = description;
-        this.id = 1;
+        this.typeId = 1;
     }
 
 
@@ -35,7 +35,7 @@ public class BasicTask extends AbstractTask {
 
     @Override
     public String toString(){
-       return "Name: " + name + "\nId: " + getId() + "\ncom.anthony.Status: " + getStatus() + "\nDescription: " + getDescription();
+       return "Name: " + name + "\nType Id: " + getTypeId() + "\nStatus: " + getStatus() + "\nDescription: " + getDescription();
     }
 
 }
