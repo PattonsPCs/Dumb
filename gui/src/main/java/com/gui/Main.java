@@ -50,6 +50,12 @@ public class Main extends Application {
         Spinner<Integer> numberSpinner = new Spinner<>(1, 100, 1);
         numberSpinner.setEditable(true);
 
+        Label timeLabel = new Label("Deadline:");
+        Spinner<Integer> hourSpinner = new Spinner<>(00, 23, 1);
+        Spinner<Integer> minuteSpinner = new Spinner<>(00, 59, 1);
+        hourSpinner.setEditable(true);
+        minuteSpinner.setEditable(true);
+
         Label textLabel = new Label("Task Name:");
         TextArea ta = new TextArea();
         ta.setPrefRowCount(5);
@@ -62,8 +68,15 @@ public class Main extends Application {
             try {
                 DatabaseManager dbManager = new DatabaseManager(selectedDb[0].toLowerCase());
                 Database db = dbManager.getDatabase();
-                outputArea.setText("Creating task: " + numberSpinner.getValue() + " with name " + ta.getText());
-                AbstractTask task = new BasicTask(ta.getText(), Status.TODO, "User created task.");
+                AbstractTask task;
+                if(hourSpinner.getValue() != null && minuteSpinner.getValue() != null){
+                    long deadline = TimeFormatting.spinnersToMillis(hourSpinner.getValue(), minuteSpinner.getValue());
+                    task = new ScheduleTask(ta.getText(), Status.TODO, "User created task", deadline);
+                    outputArea.setText("Creating task: " + numberSpinner.getValue() + " with name " + ta.getText() + " and deadline " + TimeFormatting.millisToTimeString(deadline));
+                } else {
+                    task = new BasicTask(ta.getText(), Status.TODO, "User created task.");
+                    outputArea.setText("Creating task: " + numberSpinner.getValue() + " with name " + ta.getText());
+                }
                 db.createTable();
                 db.createTask(numberSpinner.getValue(), task);
             } catch (SQLException ex) {
@@ -75,12 +88,46 @@ public class Main extends Application {
             try {
                 DatabaseManager dbManager = new DatabaseManager(selectedDb[0].toLowerCase());
                 Database db = dbManager.getDatabase();
+                AbstractTask tsk = db.readTask(numberSpinner.getValue());
                 outputArea.setText("Reading task: " + numberSpinner.getValue());
-                outputArea.setText(db.readTask(numberSpinner.getValue()).toString());
+                outputArea.setText(tsk.toString());
+                if(tsk instanceof ScheduleTask schTsk){
+                    if(schTsk.isLate()){
+                        outputArea.appendText("\n");
+                        outputArea.appendText("Task is late. Deleting...");
+                        db.deleteTask(numberSpinner.getValue());
+                    }
+                }
+
             } catch (SQLException ex) {
                 outputArea.setText("Error reading task: " + ex);
             }
         });
+
+        updBtn.setOnAction(e -> {
+            try{
+                DatabaseManager dbManager = new DatabaseManager(selectedDb[0].toLowerCase());
+                Database db = dbManager.getDatabase();
+                long newDeadline = TimeFormatting.spinnersToMillis(
+                        hourSpinner.getValue(),
+                        minuteSpinner.getValue()
+                );
+                AbstractTask updTask = db.readTask(numberSpinner.getValue());
+                if(updTask.getStatus() == Status.COMPLETE){
+                    outputArea.setText("Cannot update completed task.");
+                }
+                if(updTask instanceof ScheduleTask schedTask){
+                    schedTask.setDeadline(TimeFormatting.spinnersToMillis(hourSpinner.getValue(), minuteSpinner.getValue()));
+                    outputArea.setText("Updating task: " + numberSpinner.getValue() + " with deadline: " + TimeFormatting.millisToTimeString(newDeadline));
+                    db.saveTask(numberSpinner.getValue(), schedTask);
+                } else {
+                    outputArea.setText("Task does not have a deadline.");
+                }
+            } catch (SQLException ex){
+                outputArea.setText("Error updating task: " + ex);
+            }
+        });
+
 
         deleteBtn.setOnAction(e -> {
             try {
@@ -98,8 +145,9 @@ public class Main extends Application {
         });
 
 
-        HBox buttonBox = new HBox(10, createBtn, readBtn, deleteBtn, quitBtn);
+        HBox buttonBox = new HBox(10, createBtn, readBtn, updBtn, deleteBtn, quitBtn);
         HBox idBox = new HBox(10, numberLabel, numberSpinner);
+        HBox deadlineBox = new HBox(10, timeLabel, hourSpinner, minuteSpinner);
         HBox dbBox = new HBox(10, h2Btn, sqliteBtn);
 
 
@@ -109,6 +157,7 @@ public class Main extends Application {
                 dbBox,
                 buttonBox,
                 idBox,
+                deadlineBox,
                 textLabel,
                 ta,
                 outputArea
